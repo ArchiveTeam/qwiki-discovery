@@ -31,15 +31,9 @@ if StrictVersion(seesaw.__version__) < StrictVersion("0.1.5"):
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
 
-USER_AGENTS_LIST = ['Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0',
-                    'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:29.0) Gecko/20120101 Firefox/29.0',
-                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:25.0) Gecko/20100101 Firefox/25.0',
-                    'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36',
-                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1664.3 Safari/537.36']
-
 VERSION = "20140907.03"
-USER_AGENT = random.choice(USER_AGENTS_LIST)
-TRACKER_ID = 'twitpicdisco'
+USER_AGENT = 'ArchiveTeam'
+TRACKER_ID = 'qwikidisco'
 TRACKER_HOST = 'tracker.archiveteam.org'
 
 
@@ -59,11 +53,17 @@ class CheckIP(SimpleTask):
 
         if self._counter <= 0:
             item.log_output('Checking IP address.')
-            result = socket.gethostbyname('twitpic.com')
+            ip_set = set()
 
-            if not (result.startswith('96.127.160.') or
-                    result.startswith('173.236.110.')):
-                item.log_output('Got IP address: {0}'.format(result))
+            ip_set.add(socket.gethostbyname('twitter.com'))
+            ip_set.add(socket.gethostbyname('facebook.com'))
+            ip_set.add(socket.gethostbyname('youtube.com'))
+            ip_set.add(socket.gethostbyname('microsoft.com'))
+            ip_set.add(socket.gethostbyname('icanhas.cheezburger.com'))
+            ip_set.add(socket.gethostbyname('archiveteam.org'))
+
+            if len(ip_set) != 6:
+                item.log_output('Got IP addresses: {0}'.format(ip_set))
                 item.log_output(
                     'Are you behind a firewall/proxy? That is a big no-no!')
                 raise Exception(
@@ -149,26 +149,26 @@ def stats_id_function(item):
 # This will be shown in the warrior management panel. The logo should not
 # be too big. The deadline is optional.
 project = Project(
-    title="Twitpic Discovery",
+    title="Qwiki Discovery",
     project_html="""
-        <img class="project-logo" alt="Project logo" src="http://archiveteam.org/images/6/68/Twitpic-logo.png" height="50px" title="Follow us on Quitter!"/>
-        <h2>TwitPic Phase 1.
+        <img class="project-logo" alt="Project logo" src="http://archiveteam.org/images/1/10/Qwiki_Logo_June_2012.png" height="50px" title=""/>
+        <h2>Qwiki Phase 1.
         <span class="links">
-             <a href="http://twitpic.com/">Website</a> &middot;
-             <a href="http://tracker.archiveteam.org/twitpicdisco/">Leaderboard</a>
-             <a href="http://archiveteam.org/index.php?title=TwitPic">Wiki</a> &middot;
+             <a href="http://www.qwiki.com/">Website</a> &middot;
+             <a href="http://tracker.archiveteam.org/qwikidisco/">Leaderboard</a>
+             <a href="http://archiveteam.org/index.php?title=Qwiki">Wiki</a> &middot;
          </span>
         </h2>
-        <p>TwitPic shuts down. This is phase 1: content discovery.</p>
+        <p>Qwiki shuts down. This is phase 1: content discovery.</p>
     """,
-    utc_deadline=datetime.datetime(2014, 9, 23, 23, 59, 0)
+    utc_deadline=datetime.datetime(2014, 11, 1, 23, 59, 0)
 )
 
 pipeline = Pipeline(
     CheckIP(),
     GetItemFromTracker("http://%s/%s" % (TRACKER_HOST, TRACKER_ID), downloader,
         VERSION),
-    PrepareDirectories(warc_prefix="twitpicdisco"),
+    PrepareDirectories(warc_prefix="qwikidisco"),
     ExternalProcess('Scraper', CustomProcessArgs(),
         max_tries=2,
         accept_on_exit_code=[0],
