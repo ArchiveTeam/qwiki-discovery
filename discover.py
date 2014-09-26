@@ -2,14 +2,12 @@
 
 To use the script manually::
 
-    python discover.py 0 1000 myfile.txt.gz
+    python discover.py 0 100000000 myfile.txt.gz
 
 
 The file will contain things like:
 
-short:abcd
-user:noaheverett
-tag:asdf
+page:FPw12zjm
 '''
 import gzip
 import re
@@ -19,14 +17,9 @@ import sys
 import time
 import random
 
-USER_AGENTS_LIST = ['Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0',
-                    'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:29.0) Gecko/20120101 Firefox/29.0',
-                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:25.0) Gecko/20100101 Firefox/25.0',
-                    'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36',
-                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1664.3 Safari/537.36']
-DEFAULT_HEADERS = {'User-Agent': random.choice(USER_AGENTS_LIST)}
-ALPHABET = string.digits + string.ascii_lowercase
-assert len(ALPHABET) == 10 + 26
+DEFAULT_HEADERS = {'User-Agent': 'ArchiveTeam'}
+ALPHABET = string.digits + string.ascii_lowercase + string.ascii_uppercase
+assert len(ALPHABET) == 10 + 26 + 26
 
 
 class FetchError(Exception):
@@ -72,21 +65,16 @@ def int_to_str(num, alphabet):
 
 
 def check_range(start_num, end_num):
-    '''Check if picture exists.
-
-    This is a generator which yields the valid shortcodes and usernames.
-
-    Each line is like short:abcd or user:noaheverett
-    '''
+    '''Check if page exists.    '''
 
     for num in range(start_num, end_num + 1):
         shortcode = int_to_str(num, ALPHABET)
-        url = 'http://twitpic.com/{0}'.format(shortcode)
+        url = 'http://www.qwiki.com/v/{0}'.format(shortcode)
         counter = 0
 
         while True:
             # Try 20 times before giving up
-            if counter > 20:
+            if counter > 10:
                 # This will stop the script with an error
                 raise Exception('Giving up!')
 
@@ -98,15 +86,7 @@ def check_range(start_num, end_num):
                 time.sleep(10)
             else:
                 if text:
-                    yield 'short:{0}'.format(shortcode)
-
-                    username = extract_handle(text)
-
-                    if username:
-                        yield 'user:{0}'.format(username)
-
-                    for tag in extract_tags(text):
-                        yield 'tag:{0}'.format(tag)
+                    yield 'page:{0}'.format(shortcode)
 
                 break  # stop the while loop
 
@@ -137,22 +117,6 @@ def fetch(url):
     else:
         # Problem
         raise FetchError()
-
-
-def extract_handle(text):
-    '''Return the Twitter handle from the text.'''
-    # Search for something like
-    # <meta name="twitter:creator" value="@noaheverett" />
-    match = re.search(r'"twitter:creator"\s+value="@([a-zA-Z0-9_-]+)"', text)
-
-    if match:
-        return match.group(1)
-
-
-def extract_tags(text):
-    '''Return a list of tags from the text.'''
-    # Search for <a href="/tag/asdf">
-    return re.findall(r'"/tag/([^"]+)"', text)
 
 if __name__ == '__main__':
     main()
