@@ -1,4 +1,4 @@
-'''Find valid short codes and usernames.
+'''Find valid pages.
 
 To use the script manually::
 
