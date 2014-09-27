@@ -113,8 +113,8 @@ class CustomProcessArgs(object):
     def realize(self, item):
         item_type, item_value = item['item_name'].split(':', 1)
 
-        if item_type == 'image':
-            # Expect something like image:0-999 or image:1000-1999
+        if item_type == 'page':
+            # Expect something like page:0-99999 or page:100000-199999
             start_num, end_num = item_value.split('-', 1)
             return ['python', 'discover.py', start_num, end_num,
                     "%(item_dir)s/%(warc_file_base)s.txt.gz" % item]
